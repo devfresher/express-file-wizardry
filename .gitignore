@@ -1,0 +1,46 @@
+# Node.js
+node_modules/
+
+# Build files
+dist/
+*.js
+*.js.map
+
+# TypeScript
+*.tsbuildinfo
+
+# Visual Studio Code
+.vscode/
+
+# Dependency directories
+# https://docs.npmjs.com/cli/v7/configuring-npm/package-json#files
+node_modules
+jspm_packages
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# Yarn
+.yarn/
+yarn-error.log
+
+# TypeScript
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Test data
+src/tests/data/uploads
