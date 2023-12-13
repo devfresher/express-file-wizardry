@@ -17,7 +17,7 @@
     "file-upload",
     "middleware"
   ],
-  "author": "devFresher",
+  "author": "Usman Soliu (devFresher)",
   "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.21",
