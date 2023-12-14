@@ -8,6 +8,11 @@
     "lint": "eslint . --ext .ts",
     "test": "jest --watchAll --verbose --coverage"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devfresher/express-file-wizardry.git"
+  },
+  "readme": "./README.md",
   "keywords": [
     "amazons3",
     "google-cloud",
@@ -19,6 +24,10 @@
   ],
   "author": "Usman Soliu (devFresher)",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devfresher/express-file-wizardry/issues"
+  },
+  "homepage": "https://github.com/devfresher/express-file-wizardry#readme",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.11",
