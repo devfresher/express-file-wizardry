@@ -6,3 +6,5 @@ export type StorageType = 'memory' | 'disk' | 'amazons3';
 export type S3StorageTypeOptions = aws.S3.ClientConfiguration & { bucket: string };
 
 export type StorageTypeConfiguration = S3StorageTypeOptions | DiskStorageOptions;
+
+export type { DiskStorageOptions };

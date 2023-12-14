@@ -7,4 +7,5 @@ export interface UploadOptions {
   formats: mimeTypes.UploadMimeType;
   fieldName?: string;
   maxSize?: number;
+  multiFile?: boolean;
 }
