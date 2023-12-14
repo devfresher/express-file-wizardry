@@ -1,8 +1,3 @@
-/**
- * @author Usman Soliu (devFresher)
- * @version 1.0.0
- */
-
 import express, { RequestHandler, NextFunction } from 'express';
 import multer, { DiskStorageOptions, FileFilterCallback } from 'multer';
 import multerS3 from 'multer-s3';
@@ -14,12 +9,21 @@ import { mimeTypes } from './@types';
 
 /**
  * Handles file uploads with various storage options.
+ *
+ * @remarks
+ * This class provides a flexible and modular approach to handle file uploads in an Express application. It supports different storage types, including memory, disk, and Amazon S3.
+ *
+ * @public
+ * @author Usman Soliu (@devfresher)
+ * @version 1.0.0
  */
+
 export class FileWizardry {
   private storage!: multer.StorageEngine;
 
   /**
    * Constructor for FileMiddleware.
+   *
    * @param initialStorageType - Initial storage type.
    * @param options - Storage options.
    */
@@ -29,26 +33,37 @@ export class FileWizardry {
 
   /**
    * Retrieve the current storage engine used for file uploads.
-   * This method provides access to the configured Multer storage engine.
    *
-   * @returns {multer.StorageEngine} The current Multer storage engine.
+   * @returns The current Multer storage engine.
    */
   public getStorage = (): multer.StorageEngine => this.storage;
 
   /**
    * Middleware for handling file uploads.
+   *
    * @param options - Upload options.
    * @returns Express middleware for handling file uploads.
    */
-  public uploadFile = (options: UploadOptions): RequestHandler => {
+  public upload = (options: UploadOptions): RequestHandler => {
+    const allowMultiple = options.multiFile || false;
     const maxSize = options.maxSize || Infinity;
-    const fieldName = options.fieldName || 'uploadFile';
+    const fieldName = options.fieldName || (allowMultiple ? 'uploadFiles' : 'uploadFile');
+
+    let multerUpload: express.RequestHandler;
 
     return (req: express.Request, res: express.Response, next: NextFunction) => {
-      const multerUpload = multer({
-        storage: this.storage,
-        fileFilter: this.fileFilter(options.formats),
-      }).single(fieldName);
+      if (allowMultiple) {
+        multerUpload = multer({
+          storage: this.storage,
+          fileFilter: this.fileFilter(options.formats),
+          limits: { fileSize: maxSize },
+        }).array(fieldName);
+      } else {
+        multerUpload = multer({
+          storage: this.storage,
+          fileFilter: this.fileFilter(options.formats),
+        }).single(fieldName);
+      }
 
       // Execute Multer middleware
       multerUpload(req, res, (err: any) => {
@@ -56,12 +71,16 @@ export class FileWizardry {
           req.fileValidationError = err;
         }
 
-        if (req.fileValidationError) return next();
+        if (req.fileValidationError) {
+          return next();
+        }
 
-        if (!req.file) {
-          const errorMessage = 'No file uploaded.';
+        const files = allowMultiple ? (req.files as unknown as File[]) : ([req.file] as unknown as File[]);
+
+        if (!files || files.some((file) => !file)) {
+          const errorMessage = allowMultiple ? 'No files uploaded.' : 'No file uploaded.';
           req.fileValidationError = new Error(errorMessage);
-        } else if (maxSize && req.file.size > maxSize) {
+        } else if (!allowMultiple && maxSize && files[0]?.size > maxSize) {
           const errorMessage = `File size exceeds the allowed limit of ${maxSize} bytes.`;
           req.fileValidationError = new Error(errorMessage);
         }
@@ -73,6 +92,7 @@ export class FileWizardry {
 
   /**
    * Set the storage type for file uploads.
+   *
    * @param storageType - Storage type.
    * @param options - Storage options.
    */
@@ -95,6 +115,57 @@ export class FileWizardry {
     }
   }
 
+  /**
+   * Set the memory storage for file uploads.
+   *
+   * @private
+   */
+  private setMemoryStorage(): void {
+    this.storage = multer.memoryStorage();
+  }
+
+  /**
+   * Set the disk storage for file uploads.
+   *
+   * @private
+   * @param diskStorageOption - Disk storage options.
+   */
+  private setDiskStorage(diskStorageOption: DiskStorageOptions): void {
+    this.storage = multer.diskStorage({
+      destination: diskStorageOption && diskStorageOption.destination ? diskStorageOption.destination : 'uploads',
+      filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+      },
+    });
+  }
+
+  /**
+   * Set the Amazon S3 storage for file uploads.
+   *
+   * @private
+   * @param options - Amazon S3 options.
+   * @param bucket - S3 bucket name.
+   */
+  private setS3Storage(options: aws.S3.ClientConfiguration, bucket: string): void {
+    const s3 = new S3Client([options]);
+    this.storage = multerS3({
+      s3,
+      bucket,
+      acl: 'public-read',
+      contentType: multerS3.AUTO_CONTENT_TYPE,
+      key: (req, file, cb) => {
+        cb(null, Date.now().toString() + '-' + file.originalname);
+      },
+    });
+  }
+
+  /**
+   * Filter files based on supported formats.
+   *
+   * @private
+   * @param supportedFormats - Array of supported file formats.
+   * @returns Multer file filter callback.
+   */
   private fileFilter = (supportedFormats: mimeTypes.UploadMimeType) => {
     return (req: express.Request, file: Express.Multer.File, cb: FileFilterCallback) => {
       if (!(supportedFormats as string[]).includes(file.mimetype)) {
@@ -110,30 +181,4 @@ export class FileWizardry {
       return cb(null, true);
     };
   };
-
-  private setMemoryStorage(): void {
-    this.storage = multer.memoryStorage();
-  }
-
-  private setDiskStorage(diskStorageOption: DiskStorageOptions): void {
-    this.storage = multer.diskStorage({
-      destination: diskStorageOption && diskStorageOption.destination ? diskStorageOption.destination : 'uploads',
-      filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-      },
-    });
-  }
-
-  private setS3Storage(options: aws.S3.ClientConfiguration, bucket: string): void {
-    const s3 = new S3Client([options]);
-    this.storage = multerS3({
-      s3,
-      bucket,
-      acl: 'public-read',
-      contentType: multerS3.AUTO_CONTENT_TYPE,
-      key: (req, file, cb) => {
-        cb(null, Date.now().toString() + '-' + file.originalname);
-      },
-    });
-  }
 }
