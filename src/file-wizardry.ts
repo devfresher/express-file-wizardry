@@ -1,24 +1,16 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * @author Usman Soliu (devFresher)
  * @version 1.0.0
  */
 
-import { RequestHandler, Request, NextFunction, Response } from 'express';
+import express, { RequestHandler, NextFunction } from 'express';
 import multer, { DiskStorageOptions, FileFilterCallback } from 'multer';
 import multerS3 from 'multer-s3';
 import aws from 'aws-sdk';
 import { S3Client } from '@aws-sdk/client-s3';
 import { S3StorageTypeOptions, StorageType, StorageTypeConfiguration } from './@types/storage';
-
-export interface UploadOptions {
-  storageType?: StorageType;
-  formats: UploadMimeType;
-  fieldName?: string;
-  maxSize?: number;
-}
+import { UploadOptions } from './@types';
+import { mimeTypes } from './@types';
 
 /**
  * Handles file uploads with various storage options.
@@ -52,7 +44,7 @@ export class FileWizardry {
     const maxSize = options.maxSize || Infinity;
     const fieldName = options.fieldName || 'uploadFile';
 
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: express.Request, res: express.Response, next: NextFunction) => {
       const multerUpload = multer({
         storage: this.storage,
         fileFilter: this.fileFilter(options.formats),
@@ -103,8 +95,8 @@ export class FileWizardry {
     }
   }
 
-  private fileFilter = (supportedFormats: UploadMimeType) => {
-    return (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+  private fileFilter = (supportedFormats: mimeTypes.UploadMimeType) => {
+    return (req: express.Request, file: Express.Multer.File, cb: FileFilterCallback) => {
       if (!(supportedFormats as string[]).includes(file.mimetype)) {
         const errorMessage = Array.isArray(supportedFormats)
           ? `Invalid file format. Please upload a ${supportedFormats.join(' or ')} file.`

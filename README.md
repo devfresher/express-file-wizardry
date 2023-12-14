@@ -36,72 +36,72 @@ npm install express-file-wizardry
 ## Usage: JavaScript (CommonJS)
 
 ``` javascript
-    const express = require('express');
-    const { FileWizardry } = require('express-file-wizardry');
+const express = require('express');
+const { FileWizardry } = require('express-file-wizardry');
 
-    const app = express();
+const app = express();
 
-    const fileWizardry = new FileWizardry();
+const fileWizardry = new FileWizardry();
 
-    // Use memory storage (default)
-    fileWizardry.setStorageType('memory');
+// Use memory storage (default)
+fileWizardry.setStorageType('memory');
 
-    // Alternatively, use disk storage (default destination: 'uploads')
-    // fileWizardry.setStorageType('disk', { destination: '/path/to/upload/folder' });
+// Alternatively, use disk storage (default destination: 'uploads')
+// fileWizardry.setStorageType('disk', { destination: '/path/to/upload/folder' });
 
 
-    // Or use Amazon S3 storage
-    // fileWizardry.setStorageType('amazons3', { accessKeyId: 'your-access-key', secretAccessKey:   'your-secret-key', region: 'your-region', bucket: 'your-bucket' });
+// Or use Amazon S3 storage
+// fileWizardry.setStorageType('amazons3', { accessKeyId: 'your-access-key', secretAccessKey:   'your-secret-key', region: 'your-region', bucket: 'your-bucket' });
 
-    // Middleware for handling file uploads
-    app.post('/upload', fileWizardry.uploadFile({ formats: ['image/jpeg', 'image/png'], fieldName: 'image' }), (req, res) => {
+// Middleware for handling file uploads
+app.post('/upload', fileWizardry.uploadFile({ formats: ['image/jpeg', 'image/png'], fieldName: 'image' }), (req, res) => {
 
-        if (req.fileValidationError) {
-            return res.status(400).json({ error: req.fileValidationError.message });
-        }
+    if (req.fileValidationError) {
+        return res.status(400).json({ error: req.fileValidationError.message });
+    }
 
-        // Handle successful upload
-        res.json({ message: 'File uploaded successfully' });
-        });
-
-        app.listen(3000, () => {
-        console.log('Server running on http://localhost:3000');
+    // Handle successful upload
+    res.json({ message: 'File uploaded successfully' });
     });
+
+    app.listen(3000, () => {
+    console.log('Server running on http://localhost:3000');
+});
 ```
 
 ## Usage: TypeScript (ESM)
 
 ``` typescript
-    import express from 'express';
-    import { FileWizardry } from 'express-file-wizardry';
+import express from 'express';
+import { FileWizardry } from 'express-file-wizardry';
 
-    const app = express();
+const app = express();
 
-    const fileWizardry = new FileWizardry();
+const fileWizardry = new FileWizardry();
 
-    // Use memory storage (default)
-    fileWizardry.setStorageType('memory');
+// Use memory storage (default)
+fileWizardry.setStorageType('memory');
 
-    // Alternatively, use disk storage (default destination: 'uploads')
-    // fileWizardry.setStorageType('disk', { destination: '/path/to/upload/folder' });
+// Alternatively, use disk storage (default destination: 'uploads')
+// fileWizardry.setStorageType('disk', { destination: '/path/to/upload/folder' });
 
-    // Or use Amazon S3 storage
-    // fileWizardry.setStorageType('amazons3', { accessKeyId: 'your-access-key', secretAccessKey: 'your-secret-key', region: 'your-region', bucket: 'your-bucket' });
+// Or use Amazon S3 storage
+// fileWizardry.setStorageType('amazons3', { accessKeyId: 'your-access-key', secretAccessKey: 'your-secret-key', region: 'your-region', bucket: 'your-bucket' });
 
-    // Middleware for handling file uploads
-    app.post('/upload', fileWizardry.uploadFile({ formats: ['image/jpeg', 'image/png'], fieldName: 'image' }), (req, res) => {
+// Middleware for handling file uploads
+app.post('/upload', fileWizardry.uploadFile({ formats: ['image/jpeg', 'image/png'], fieldName: 'image' }), (req, res) => {
 
-        if (req.fileValidationError) {
-            return res.status(400).json({ error: req.fileValidationError.message });
-        }
+    if (req.fileValidationError) {
+        return res.status(400).json({ error: req.fileValidationError.message });
+    }
 
-        // Handle successful upload
-        res.json({ message: 'File uploaded successfully' });
-    });
+    // Handle successful upload
+    res.json({ message: 'File uploaded successfully' });
+});
 
-    app.listen(3000, () => {
-        console.log('Server running on http://localhost:3000');
-    });
+app.listen(3000, () => {
+    console.log('Server running on http://localhost:3000');
+});
 ```
 
 ## API
@@ -136,8 +136,6 @@ For more examples, check the [examples](/examples/) directory.
 
 Feel free to contribute to the improvement of `express-file-wizardry` by working on or suggesting the following enhancements:
 
-- **Custom Error Handling:** Implement more customizable error handling to allow users to define how errors during file upload are handled.
-
 - **Advanced File Filtering:** Enhance file filtering capabilities to support more advanced filtering options such as file size ranges, mime type checking, etc.
 
 - **Middleware Options:** Provide additional options for middleware configuration to offer more flexibility to users.
@@ -148,8 +146,15 @@ If you have any suggestions or would like to contribute, feel free to open an is
 
 ## Contributing
 
+Please contact `fresher.dev01@gmail.com` if you're interested.
 Contributions are welcome! See [CONTRIBUTING.md](/CONTRIBUTING.md) for more information.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://opensource.org/licenses/MIT) file for details.
+
+## Credits
+
+This project uses the fantastic [multer-S3](https://www.npmjs.com/package/multer-s3) library for Amazon S3 storage. Special thanks to its author for their valuable contribution to the Node.js community.
+
+- **Linus Unnebäck:** [LinusU](https://github.com/LinusU)

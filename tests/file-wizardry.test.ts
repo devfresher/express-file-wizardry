@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-/* eslint-disable @typescript-eslint/no-redeclare */
-
-import express, { Request, Response } from 'express';
-
+import express from 'express';
 import request from 'supertest';
 
-import { FileWizardry, UploadOptions } from '../file-wizardry';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
-import { StorageType } from '../@types/storage';
+import { FileWizardry, UploadOptions, storageTypes } from '../src/';
 
 jest.mock('aws-sdk');
 jest.mock('multer-s3');
@@ -32,7 +27,7 @@ describe('FileWizardry', () => {
         };
 
         app.post('/upload', fileWizardry.uploadFile(uploadOptions), (req, res) => {
-          const requestWithValidation = req as Request & { fileValidationError?: Error };
+          const requestWithValidation = req as express.Request & { fileValidationError?: Error };
           if (requestWithValidation.fileValidationError) {
             return res.status(400).json({ error: requestWithValidation.fileValidationError.message });
           }
@@ -41,7 +36,7 @@ describe('FileWizardry', () => {
 
         request(app)
           .post('/upload')
-          .attach('image', './src/tests/data/img1.png')
+          .attach('image', './tests/data/img1.png')
           .expect(200)
           .end((err, res) => {
             if (err) return done(err);
@@ -59,7 +54,7 @@ describe('FileWizardry', () => {
         };
 
         app.post('/upload', fileWizardry.uploadFile(uploadOptions), (req, res) => {
-          const requestWithValidation = req as Request & { fileValidationError?: Error };
+          const requestWithValidation = req as express.Request & { fileValidationError?: Error };
           if (requestWithValidation.fileValidationError) {
             return res.status(400).json({ error: requestWithValidation.fileValidationError.message });
           }
@@ -68,7 +63,7 @@ describe('FileWizardry', () => {
 
         request(app)
           .post('/upload')
-          .attach('doc', './src/tests/data/rptstdholder.pdf')
+          .attach('doc', './tests/data/rptstdholder.pdf')
           .expect(400)
           .end((err, res) => {
             if (err) return done(err);
@@ -87,7 +82,7 @@ describe('FileWizardry', () => {
         };
 
         app.post('/upload', fileWizardry.uploadFile(uploadOptions), (req, res) => {
-          const requestWithValidation = req as Request & { fileValidationError?: Error };
+          const requestWithValidation = req as express.Request & { fileValidationError?: Error };
 
           if (requestWithValidation.fileValidationError) {
             return res.status(400).json({ error: requestWithValidation.fileValidationError.message });
@@ -97,7 +92,7 @@ describe('FileWizardry', () => {
 
         request(app)
           .post('/upload')
-          .attach('image', './src/tests/data/img1.png') // a file larger than the allowed limit
+          .attach('image', './tests/data/img1.png') // a file larger than the allowed limit
           .expect(400)
           .end((err, res) => {
             if (err) return done(err);
@@ -116,7 +111,7 @@ describe('FileWizardry', () => {
         };
 
         app.post('/upload', fileWizardry.uploadFile(uploadOptions), (req, res) => {
-          const requestWithValidation = req as Request & { fileValidationError?: Error };
+          const requestWithValidation = req as express.Request & { fileValidationError?: Error };
 
           if (requestWithValidation.fileValidationError) {
             return res.status(400).json({ error: requestWithValidation.fileValidationError.message });
@@ -144,7 +139,7 @@ describe('FileWizardry', () => {
         };
 
         app.post('/upload', fileWizardry.uploadFile(uploadOptions), (req, res) => {
-          const requestWithValidation = req as Request & { fileValidationError?: Error };
+          const requestWithValidation = req as express.Request & { fileValidationError?: Error };
 
           if (requestWithValidation.fileValidationError) {
             return res.status(400).json({ error: requestWithValidation.fileValidationError.message });
@@ -154,7 +149,7 @@ describe('FileWizardry', () => {
 
         request(app)
           .post('/upload')
-          .attach('images', './src/tests/data/img1.png')
+          .attach('images', './tests/data/img1.png')
           .expect(400)
           .end((err, res) => {
             if (err) return done(err);
@@ -172,7 +167,7 @@ describe('FileWizardry', () => {
         expect(fileWizardry.getStorage()).toBeInstanceOf(multer.memoryStorage().constructor);
       });
       it('should change the storageType to disk', () => {
-        fileWizardry.setStorageType('disk', { destination: './src/tests/data/uploads/folder' });
+        fileWizardry.setStorageType('disk', { destination: './tests/data/uploads/folder' });
         expect(fileWizardry.getStorage()).toBeInstanceOf(multer.diskStorage({}).constructor);
       });
       it('should change the storageType to amazonS3', () => {
@@ -194,7 +189,7 @@ describe('FileWizardry', () => {
         expect(invalidCall).toThrow('S3 storage options are required. Provide options for S3 storage.');
       });
       it('should return an error if invalid/unsupported storage type is provided', () => {
-        const invalidCall = () => fileWizardry.setStorageType('aaa' as unknown as StorageType);
+        const invalidCall = () => fileWizardry.setStorageType('aaa' as unknown as storageTypes.StorageType);
         expect(invalidCall).toThrow('Invalid storage type.');
       });
     });

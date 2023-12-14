@@ -1,4 +1,4 @@
-# Contributing to express-file-wizardry
+# Help us Improve express-file-wizardry
 
 Thank you for considering contributing to express-file-wizardry! Your contributions help make this project better.
 

@@ -17,6 +17,6 @@ type ArchiveMimeType = 'application/zip';
 
 type ApplicationMimeType = 'application/octet-stream' | 'application/xhtml+xml';
 
-type UploadMimeType = Array<
+export type UploadMimeType = Array<
   TextMimeType | DocumentMimeType | ImageMimeType | AudioMimeType | VideoMimeType | ArchiveMimeType | ApplicationMimeType
 >;
