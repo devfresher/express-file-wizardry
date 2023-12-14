@@ -121,6 +121,11 @@ Middleware for handling file uploads.
   - `formats`: Array of allowed file formats.
   - `fieldName` (optional): Name of the field in the request.
   - `maxSize` (optional): Maximum file size in bytes.
+  - `multiFile` (optional): Boolean, set to `true` for multiple file uploads.
+
+    When handling multiple file uploads:
+    - If `multiFile` is `true`, the uploaded files will be accessible with `req.files`.
+    - If `multiFile` is `false` or not specified, the uploaded file will be accessible with `req.file`.
 
 `setStorageType(storageType: StorageType, options?: StorageTypeConfiguration): void`
 Set the storage type for file uploads.
