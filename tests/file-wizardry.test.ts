@@ -3,10 +3,15 @@ import request from 'supertest';
 
 import multer from 'multer';
 import multerS3 from 'multer-s3';
+import cloudinary from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+
 import { FileWizardry, UploadOptions, storageTypes } from '../src/';
 
 jest.mock('aws-sdk');
 jest.mock('multer-s3');
+jest.mock('cloudinary');
+jest.mock('multer-storage-cloudinary');
 
 let app: express.Application;
 
@@ -152,9 +157,31 @@ describe('FileWizardry', () => {
       });
     });
 
+    it('changes the storageType to cloudinary', () => {
+      const cloudinaryOptions = { cloud_name: 'my-cloud', api_key: 'api-key', api_secret: 'api-secret' };
+      const folder = 'uploads/folder';
+
+      fileWizardry.setStorageType('cloudinary', { ...cloudinaryOptions, folder });
+
+      expect(cloudinary.v2.config).toHaveBeenCalledWith(cloudinaryOptions);
+      expect(CloudinaryStorage).toHaveBeenCalledWith({
+        cloudinary: cloudinary.v2,
+        params: {
+          folder,
+          public_id: expect.any(Function),
+        },
+      });
+    });
+
     it('throws an error if s3 storage option is not provided', () => {
       expect(() => fileWizardry.setStorageType('amazons3')).toThrow(
         'S3 storage options are required. Provide options for S3 storage.',
+      );
+    });
+
+    it('throws an error if cloudinary storage option is not provided', () => {
+      expect(() => fileWizardry.setStorageType('cloudinary')).toThrow(
+        'Cloudinary storage options are required. Provide options for Cloudinary storage.',
       );
     });
 

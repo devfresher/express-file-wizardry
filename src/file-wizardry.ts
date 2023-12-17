@@ -1,12 +1,13 @@
 import express, { RequestHandler, NextFunction } from 'express';
 import multer, { DiskStorageOptions, FileFilterCallback } from 'multer';
-import multerS3 from 'multer-s3';
 import aws from 'aws-sdk';
 import { S3Client } from '@aws-sdk/client-s3';
-import { S3StorageTypeOptions, StorageType, StorageTypeConfiguration } from './@types/storage';
+import multerS3 from 'multer-s3';
+import cloudinary from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { CloudinaryStorageTypeOptions, S3StorageTypeOptions, StorageType, StorageTypeConfiguration } from './@types/storage';
 import { UploadOptions } from './@types';
 import { mimeTypes } from './@types';
-
 /**
  * Handles file uploads with various storage options.
  *
@@ -95,6 +96,7 @@ export class FileWizardry {
    *
    * @param storageType - Storage type.
    * @param options - Storage options.
+   * @returns void
    */
   public setStorageType(storageType: StorageType, options?: StorageTypeConfiguration): void {
     switch (storageType) {
@@ -110,6 +112,12 @@ export class FileWizardry {
         const { bucket, ...otherS3Options } = options as S3StorageTypeOptions;
         this.setS3Storage(otherS3Options, bucket);
         break;
+      case 'cloudinary':
+        if (!options) throw new Error('Cloudinary storage options are required. Provide options for cloudinary storage.');
+
+        const { folder, ...otherCloudinaryOptions } = options as CloudinaryStorageTypeOptions;
+        this.setCloudinaryStorage(otherCloudinaryOptions, folder);
+        break;
       default:
         throw new Error('Invalid storage type.');
     }
@@ -119,6 +127,7 @@ export class FileWizardry {
    * Set the memory storage for file uploads.
    *
    * @private
+   * @returns void
    */
   private setMemoryStorage(): void {
     this.storage = multer.memoryStorage();
@@ -129,6 +138,7 @@ export class FileWizardry {
    *
    * @private
    * @param diskStorageOption - Disk storage options.
+   * @returns void
    */
   private setDiskStorage(diskStorageOption: DiskStorageOptions): void {
     this.storage = multer.diskStorage({
@@ -145,6 +155,7 @@ export class FileWizardry {
    * @private
    * @param options - Amazon S3 options.
    * @param bucket - S3 bucket name.
+   * @returns void
    */
   private setS3Storage(options: aws.S3.ClientConfiguration, bucket: string): void {
     const s3 = new S3Client([options]);
@@ -155,6 +166,29 @@ export class FileWizardry {
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: (req, file, cb) => {
         cb(null, Date.now().toString() + '-' + file.originalname);
+      },
+    });
+  }
+
+  /**
+   * Sets up Cloudinary as the storage for file uploads.
+   *
+   * @remarks
+   * This method configures Cloudinary storage using the provided options and folder name (optional).
+   *
+   * @private
+   * @param options - Cloudinary configuration options.
+   * @param folder - Optional folder name in Cloudinary where the files will be stored.
+   * @returns void
+   */
+  private setCloudinaryStorage(options: cloudinary.ConfigOptions, folder?: string): void {
+    cloudinary.v2.config(options);
+
+    this.storage = new CloudinaryStorage({
+      cloudinary: cloudinary.v2,
+      params: {
+        folder: folder,
+        public_id: (req: express.Request, file: Express.Multer.File) => Date.now().toString() + '-' + file.originalname,
       },
     });
   }

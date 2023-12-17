@@ -2,17 +2,17 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-`express-file-wizardry` is an Express middleware for handling file uploads with support for different storage types including memory, disk, and Amazon S3.
+`express-file-wizardry` is an Express middleware for handling file uploads with support for different storage types including memory, disk, cloudinary and Amazon S3.
 
 ## Why express-file-wizardry
 
-- **Simplified Configuration:** `express-file-wizardry` provides a straightforward API for handling file uploads with various storage options. Whether you prefer `in-memory storage`, `local disk storage`, or `cloud storage` with services like `Amazon S3`, `Google cloud (upcoming)`, the configuration is simplified, allowing you to focus on your application logic.
+- **Simplified Configuration:** `express-file-wizardry` provides a straightforward API for handling file uploads with various storage options. Whether you prefer `in-memory storage`, `local disk storage`, or `cloud storage` with services like `Cloudinary`, `Amazon S3`, `Google cloud (upcoming)`, the configuration is simplified, allowing you to focus on your application logic.
 
 - **Modularity and Separation of Concerns:** The package is designed with modularity in mind, separating concerns such as storage configuration, file filtering, and middleware setup. This makes the codebase clean, maintainable, and easy to extend.
 
 - **Versatile File Type Support:** You can easily define the allowed file formats for uploads, ensuring that your application only accepts the types of files you expect. The package supports a wide range of file types, from images to documents and archives.
 
-- **Flexible Storage Options:** Choose the storage type that best fits your application requirements. Whether you need fast in-memory storage for temporary files, local disk storage for persistent storage, or Amazon S3 for scalable cloud storage, `express-file-wizardry` has you covered.
+- **Flexible Storage Options:** Choose the storage type that best fits your application requirements. Whether you need fast in-memory storage for temporary files, local disk storage for persistent storage, cloudinary or Amazon S3 for scalable cloud storage, `express-file-wizardry` has you covered.
 
 ## Table of Contents
 
@@ -53,6 +53,9 @@ fileWizardry.setStorageType('memory');
 // Or use Amazon S3 storage
 // fileWizardry.setStorageType('amazons3', { accessKeyId: 'your-access-key', secretAccessKey:   'your-secret-key', region: 'your-region', bucket: 'your-bucket' });
 
+// Or use Cloudinary storage
+// fileWizardry.setStorageType('cloudinary', { cloud_name: 'my-cloud', api_key: 'api-key', api_secret: 'api-secret' });
+
 // Middleware for handling file uploads
 app.post('/upload', fileWizardry.uploadFile({ formats: ['image/jpeg', 'image/png'], fieldName: 'image' }), (req, res) => {
 
@@ -87,6 +90,9 @@ fileWizardry.setStorageType('memory');
 
 // Or use Amazon S3 storage
 // fileWizardry.setStorageType('amazons3', { accessKeyId: 'your-access-key', secretAccessKey: 'your-secret-key', region: 'your-region', bucket: 'your-bucket' });
+
+// Or use Cloudinary storage
+// fileWizardry.setStorageType('cloudinary', { cloud_name: 'my-cloud', api_key: 'api-key', api_secret: 'api-secret' });
 
 // Middleware for handling file uploads
 app.post('/upload', fileWizardry.uploadFile({ formats: ['image/jpeg', 'image/png'], fieldName: 'image' }), (req, res) => {
@@ -160,6 +166,8 @@ This project is licensed under the MIT License - see the [LICENSE](https://opens
 
 ## Credits
 
-This project uses the fantastic [multer-S3](https://www.npmjs.com/package/multer-s3) library for Amazon S3 storage. Special thanks to its author for their valuable contribution to the Node.js community.
+This project relies on the following packages:
 
-- **Linus Unnebäck:** [LinusU](https://github.com/LinusU)
+- **multer-S3:** A fantastic library for Amazon S3 storage. Special thanks to [Linus Unnebäck](https://github.com/LinusU) for their valuable contribution to the Node.js community.
+
+- **multer-storage-cloudinary:** Excellent multer storage engine for Cloudinary. Kudos to the authors for their contribution.

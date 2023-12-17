@@ -3,6 +3,8 @@ __tests__
 *.test.js
 *.spec.js
 test/
+tests/
+coverage/
 
 # Exclude build artifacts
 dist/
