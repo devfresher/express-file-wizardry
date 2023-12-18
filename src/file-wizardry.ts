@@ -200,7 +200,7 @@ export class FileWizardry {
    * @param supportedFormats - Array of supported file formats.
    * @returns Multer file filter callback.
    */
-  private fileFilter = (supportedFormats: mimeTypes.UploadMimeType) => {
+  private fileFilter = (supportedFormats: mimeTypes.UploadMimeType[]) => {
     return (req: express.Request, file: Express.Multer.File, cb: FileFilterCallback) => {
       if (!(supportedFormats as string[]).includes(file.mimetype)) {
         const errorMessage = Array.isArray(supportedFormats)
