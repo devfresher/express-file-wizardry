@@ -3,8 +3,8 @@
  * @version 1.0.0
  */
 
-import { FileWizardry } from './file-wizardry';
-import { UploadOptions, mimeTypes, storageTypes } from './@types/index';
+import { FileWizardry } from '@src/file-wizardry';
+import { UploadOptions, mimeTypes, storage } from '@src/interfaces';
 
-export { FileWizardry, mimeTypes, storageTypes };
+export { FileWizardry, mimeTypes, storage };
 export type { UploadOptions };

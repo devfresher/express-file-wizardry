@@ -4,6 +4,7 @@
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
+    "baseUrl": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,10 +13,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    
+    // "declarationMap": true,
+    // "sourceMap": true,
+    "paths": {
+      "@src/*": ["src/*"]
+    }
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "src/testme.ts"],
   "exclude": ["node_modules"]
 }
