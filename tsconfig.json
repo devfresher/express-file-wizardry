@@ -17,7 +17,11 @@
     // "sourceMap": true,
     "paths": {
       "@src/*": ["src/*"]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types",
+    ],
   },
   "include": ["./src/**/*.ts", "src/testme.ts"],
   "exclude": ["node_modules"]

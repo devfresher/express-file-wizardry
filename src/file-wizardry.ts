@@ -1,15 +1,16 @@
-import express, { RequestHandler, NextFunction } from 'express';
+import { Request, Response, RequestHandler, NextFunction } from 'express';
 import multer, { DiskStorageOptions, FileFilterCallback } from 'multer';
 import aws from 'aws-sdk';
 import { S3Client } from '@aws-sdk/client-s3';
 import multerS3 from 'multer-s3';
-import cloudinary, { v2, ConfigOptions } from 'cloudinary';
-import createCloudinaryStorage, { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { storage } from '@src/interfaces';
-import { UploadOptions, mimeTypes } from '@src/interfaces';
+import cloudinary from 'cloudinary';
+import cloudinaryStorage from 'multer-storage-cloudinary';
+import { UploadOptions, mimeTypes, storage } from '@src/interfaces';
+import { CloudinaryOptions } from '@src/@types/multer-storage-cloudinary';
+import { CloudinaryStorageTypeOptions } from '@src/interfaces/storage';
 
 /**
- * Handles file uploads with various storage options.
+ * Handles file uploads with various storage options  .
  *
  * @remarks
  * This class provides a flexible and modular approach to handle file uploads in an Express application. It supports different storage types, including memory, disk, and Amazon S3.
@@ -21,8 +22,6 @@ import { UploadOptions, mimeTypes } from '@src/interfaces';
 
 export class FileWizardry {
   private storage!: multer.StorageEngine;
-
-  private setPublicUrlMiddleware?: RequestHandler;
 
   /**
    * Constructor for FileMiddleware.
@@ -52,9 +51,9 @@ export class FileWizardry {
     const maxSize = options.maxSize || Infinity;
     const fieldName = options.fieldName || (allowMultiple ? 'uploadFiles' : 'uploadFile');
 
-    let multerUpload: express.RequestHandler;
+    let multerUpload: RequestHandler;
 
-    return (req: express.Request, res: express.Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       if (allowMultiple) {
         multerUpload = multer({
           storage: this.storage,
@@ -68,28 +67,24 @@ export class FileWizardry {
         }).single(fieldName);
       }
 
-      console.log(this.storage);
-
       // Execute Multer middleware
       multerUpload(req, res, (err: any) => {
-        console.log(options);
-
         if (err) {
-          // req.fileValidationError = err;
+          req.fileValidationError = err;
         }
 
-        // if (req.fileValidationError) {
-        //   return next();
-        // }
+        if (req.fileValidationError) {
+          return next();
+        }
 
         const files = allowMultiple ? (req.files as unknown as File[]) : ([req.file] as unknown as File[]);
 
         if (!files || files.some((file) => !file)) {
           const errorMessage = allowMultiple ? 'No files uploaded.' : 'No file uploaded.';
-          // req.fileValidationError = new Error(errorMessage);
+          req.fileValidationError = new Error(errorMessage);
         } else if (!allowMultiple && maxSize && files[0]?.size > maxSize) {
           const errorMessage = `File size exceeds the allowed limit of ${maxSize} bytes.`;
-          // req.fileValidationError = new Error(errorMessage);
+          req.fileValidationError = new Error(errorMessage);
         }
 
         return next();
@@ -121,8 +116,7 @@ export class FileWizardry {
       case 'cloudinary':
         if (!options) throw new Error('Cloudinary storage options are required. Provide options for cloudinary storage.');
 
-        const { folder, ...otherCloudinaryOptions } = options as storage.CloudinaryStorageTypeOptions;
-        this.setCloudinaryStorage(otherCloudinaryOptions, folder);
+        this.setCloudinaryStorage(options);
         break;
       default:
         throw new Error('Invalid storage type.');
@@ -187,16 +181,18 @@ export class FileWizardry {
    * @param folder - Optional folder name in Cloudinary where the files will be stored.
    * @returns void
    */
-  private setCloudinaryStorage(options: ConfigOptions, folder?: string): void {
-    const cloudinary = v2.config(options);
+  private setCloudinaryStorage(options: CloudinaryStorageTypeOptions): void {
+    cloudinary.v2.config(options);
 
-    this.storage = createCloudinaryStorage({
-      cloudinary: cloudinary as typeof v2,
+    const cloudinaryOptions: CloudinaryOptions = {
+      cloudinary: cloudinary.v2,
       params: {
-        folder: folder,
-        public_id: (req: express.Request, file: Express.Multer.File) => Date.now().toString() + '-' + file.originalname,
+        folder: options.folder,
+        public_id: (req: Request, file: Express.Multer.File) => Date.now().toString() + '-' + file.originalname,
       },
-    });
+    };
+
+    this.storage = cloudinaryStorage(cloudinaryOptions);
   }
 
   /**
@@ -207,13 +203,13 @@ export class FileWizardry {
    * @returns Multer file filter callback.
    */
   private fileFilter = (supportedFormats: mimeTypes.UploadMimeType[]) => {
-    return (req: express.Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    return (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
       if (!(supportedFormats as string[]).includes(file.mimetype)) {
         const errorMessage = Array.isArray(supportedFormats)
           ? `Invalid file format. Please upload a ${supportedFormats.join(' or ')} file.`
           : `Invalid file format. Please upload a file with one of the following formats: ${supportedFormats}.`;
 
-        // req.fileValidationError = new Error(errorMessage);
+        req.fileValidationError = new Error(errorMessage);
         return cb(null, false);
       }
 

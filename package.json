@@ -6,7 +6,13 @@
   "scripts": {
     "build": "tsc -p . && tsc-alias",
     "lint": "eslint . --ext .ts",
-    "test": "jest --watchAll --verbose --coverage"
+    "test": "jest --watchAll --verbose --coverage",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
@@ -33,7 +39,7 @@
     "@types/jest": "^29.5.11",
     "@types/multer": "^1.4.11",
     "@types/multer-s3": "^3.0.3",
-    "@types/node": "^20.10.4",
+    "@types/node": "^20.11.17",
     "@types/supertest": "^2.0.16",
     "eslint": "^8.55.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -47,6 +53,7 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.8",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
