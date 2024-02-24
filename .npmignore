@@ -7,9 +7,10 @@ tests/
 coverage/
 
 # Exclude build artifacts
-dist/
+src/
 build/
 node_modules/
+uploads/
 
 # Exclude configuration files
 .eslintignore
@@ -22,3 +23,7 @@ jest.config.js
 # Exclude version control files
 .git/
 .gitignore
+.gihub/
+
+# Exclude IDE files
+.vscode

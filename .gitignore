@@ -43,4 +43,4 @@ yarn-error.log
 coverage/
 
 # Test data
-src/tests/data/uploads
+uploads/

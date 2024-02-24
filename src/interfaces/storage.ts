@@ -10,10 +10,28 @@ declare type CloudinaryStorageTypeOptions = cloudinary.ConfigOptions & { folder?
 
 declare type StorageTypeConfiguration = S3StorageTypeOptions | DiskStorageOptions | CloudinaryStorageTypeOptions;
 
+declare type S3DeleteOption = {
+  Bucket: string;
+  key: string;
+};
+
+declare type CloudinaryDeleteOption = {
+  public_id: string;
+};
+
+declare type DiskDeleteOption = {
+  path: string;
+};
+declare type DeletionOptions = S3DeleteOption | CloudinaryDeleteOption | DiskDeleteOption;
+
 export type {
+  CloudinaryStorageTypeOptions,
   DiskStorageOptions,
+  S3DeleteOption,
+  CloudinaryDeleteOption,
+  DiskDeleteOption,
+  DeletionOptions,
   StorageType,
   StorageTypeConfiguration,
   S3StorageTypeOptions,
-  CloudinaryStorageTypeOptions,
 };

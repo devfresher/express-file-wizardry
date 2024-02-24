@@ -1,6 +1,7 @@
 import { Request, Response, RequestHandler, NextFunction } from 'express';
 import multer, { DiskStorageOptions, FileFilterCallback } from 'multer';
-import aws from 'aws-sdk';
+import fs from 'fs';
+import aws, { S3 } from 'aws-sdk';
 import { S3Client } from '@aws-sdk/client-s3';
 import multerS3 from 'multer-s3';
 import cloudinary from 'cloudinary';
@@ -36,6 +37,7 @@ export class FileWizardry {
   /**
    * Retrieve the current storage engine used for file uploads.
    *
+   * @public
    * @returns The current Multer storage engine.
    */
   public getStorage = (): multer.StorageEngine => this.storage;
@@ -43,6 +45,7 @@ export class FileWizardry {
   /**
    * Middleware for handling file uploads.
    *
+   * @public
    * @param options - Upload options.
    * @returns Express middleware for handling file uploads.
    */
@@ -93,8 +96,42 @@ export class FileWizardry {
   };
 
   /**
+   * Deletes a file based on the specified storage type and options.
+   *
+   * @public
+   * @param {storage.StorageType} storageType - the type of storage for the file
+   * @param {storage.DeletionOptions} option - the options for file deletion based on the storage type
+   */
+  public deleteFile(storageType: storage.StorageType, option: storage.DeletionOptions) {
+    switch (storageType) {
+      case 'memory':
+        this.deleteFileFromMemory();
+        break;
+      case 'disk':
+        const { path } = option as storage.DiskDeleteOption;
+        this.deleteFileFromDisk(path);
+        break;
+      case 'amazons3':
+        if (!option) throw new Error('S3 storage options are required. Provide options for S3 storage.');
+        const { key, Bucket: bucket } = option as storage.S3DeleteOption;
+
+        this.deleteFileFromS3(key, bucket);
+        break;
+      case 'cloudinary':
+        if (!option) throw new Error('Cloudinary storage options are required. Provide options for cloudinary storage.');
+
+        const { public_id: publicId } = option as storage.CloudinaryDeleteOption;
+        this.deleteFileFromCloudinary(publicId);
+        break;
+      default:
+        throw new Error('Invalid storage type.');
+    }
+  }
+
+  /**
    * Set the storage type for file uploads.
    *
+   * @public
    * @param storageType - Storage type.
    * @param options - Storage options.
    * @returns void
@@ -134,6 +171,16 @@ export class FileWizardry {
   }
 
   /**
+   * Deletes a file from memory storage.
+   *
+   * @private
+   * @return {void}
+   */
+  private deleteFileFromMemory(): void {
+    throw new Error('File in memory storage cannot be deleted.');
+  }
+
+  /**
    * Set the disk storage for file uploads.
    *
    * @private
@@ -147,6 +194,22 @@ export class FileWizardry {
         cb(null, Date.now() + '-' + file.originalname);
       },
     });
+  }
+
+  /**
+   * Deletes a file from the disk.
+   *
+   * @private
+   * @param {string} filename - the name of the file to be deleted
+   * @param {string} destination - the directory where the file is located (default is 'uploads')
+   * @return {Promise<void>} a Promise that resolves with no value upon successful deletion
+   */
+  private async deleteFileFromDisk(filename: string, destination: string = 'uploads'): Promise<void> {
+    const filePath = `${destination}/${filename}`;
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 
   /**
@@ -168,6 +231,22 @@ export class FileWizardry {
         cb(null, Date.now().toString() + '-' + file.originalname);
       },
     });
+  }
+
+  /**
+   * Deletes a file from S3.
+   *
+   * @param {string} key - the key of the file to be deleted
+   * @return {Promise<void>} a Promise that resolves when the file is deleted
+   */
+  private async deleteFileFromS3(key: string, bucket: string): Promise<void> {
+    const s3 = new S3();
+    const params = {
+      Bucket: bucket,
+      Key: key,
+    };
+
+    await s3.deleteObject(params).promise();
   }
 
   /**
@@ -193,6 +272,17 @@ export class FileWizardry {
     };
 
     this.storage = cloudinaryStorage(cloudinaryOptions);
+  }
+
+  /**
+   * Deletes a file from Cloudinary.
+   *
+   * @private
+   * @param {string} publicId - the public ID of the file to be deleted
+   * @return {Promise<void>} a Promise that resolves when the file is successfully deleted
+   */
+  private async deleteFileFromCloudinary(publicId: string): Promise<void> {
+    await cloudinary.v2.uploader.destroy(publicId);
   }
 
   /**
