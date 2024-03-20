@@ -1,6 +1,6 @@
 {
   "name": "express-file-wizardry",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Flexible and extensible Express middleware for handling file uploads. Written in Typescript with support for various storage engines.",
   "main": "dist/index.js",
   "scripts": {
