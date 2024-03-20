@@ -29,3 +29,5 @@ export interface UploadOptions {
    */
   multiFile?: boolean;
 }
+
+export interface File extends Express.Multer.File {}
